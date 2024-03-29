@@ -5,10 +5,15 @@ role_choices = (
     ("2", "Normal")
 )
 
+walletType_choices = (
+    ("solana", "solana"),
+    ("ethereum", "ethereum")
+)
+
 
 class UserRegisterationForm(forms.Form):
     email = forms.EmailField(required=False)
-    password = forms.CharField(required=True)
+    password = forms.CharField(required=False)
     first_name = forms.CharField(required=False)
     last_name = forms.CharField(required=False)
     date_of_birth = forms.DateField(required=False)
@@ -22,5 +27,8 @@ class UserRegisterationForm(forms.Form):
 
 class UserLoginForm(forms.Form):
     email = forms.EmailField(required=False)
-    password = forms.CharField(required=True)
-    wallet_address = forms.CharField(required=True)
+    password = forms.CharField(required=False)
+    requestNonce = forms.CharField(required=True)
+    publicKey = forms.CharField(required=True)
+    walletType = forms.ChoiceField(choices=walletType_choices, required=True)
+    signature = forms.CharField(required=False)

@@ -6,9 +6,11 @@ from django.utils.decorators import method_decorator
 from django.contrib.auth.hashers import make_password, check_password
 
 import json
+import random
 
 from .forms import UserRegisterationForm, UserLoginForm
 from .models import User
+from utils import is_valid_solana_address, verify_signature
 
 
 # Create your views here.
@@ -23,7 +25,10 @@ class SignupView(View):
 
         if form.is_valid():
             email = data.get('email', None)
-            password = make_password(data.get('password'))
+            if data.get('password'):
+                password = make_password(data.get('password'))
+            else:
+                password = None
             first_name = data.get('first_name', '')
             last_name = data.get('last_name', '')
             date_of_birth = data.get('date_of_birth', None)
@@ -36,7 +41,7 @@ class SignupView(View):
 
             user = User.objects(wallet_address=wallet_address).first()
             if user:
-                return JsonResponse({'message': 'Already existed user'}, safe=False)
+                return JsonResponse({'message': 'Already existed user'}, safe=False, status=400)
             else:
                 user = User(
                     email=email,
@@ -55,7 +60,7 @@ class SignupView(View):
                 return JsonResponse({'message': 'Created successfully'}, safe=True)
 
         else:
-            return JsonResponse({'message': 'Invalid inputs', 'errors': form.errors}, safe=False)
+            return JsonResponse({'message': 'Invalid inputs', 'errors': form.errors}, safe=False, status=400)
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -66,24 +71,62 @@ class SigninView(View):
         form = UserLoginForm(data)
 
         if form.is_valid():
-            password = data.get('password')
-            wallet_address = data.get('wallet_address')
-            role = data.get('role', '2')
+            publicKey = data.get('publicKey')
+            requestNonce = data.get('requestNonce')
+            signature = data.get('signature')
+            walletType = data.get('walletType')
 
-            user = User.objects.filter(wallet_address=wallet_address).first()
-            print(user.password)
-            if user:
-                if check_password(password, user.password):
-                    request.session['user_id'] = str(user.id)
-                    request.session['wallet_address'] = user.wallet_address
-                    request.session['role'] = user.role
+            print(is_valid_solana_address(publicKey))
+            if is_valid_solana_address(publicKey) == False:
+                return JsonResponse({'message': 'Invalid ${walletType} wallet address provided'}, safe=False, status=400)
 
-                    return JsonResponse({'message': 'Logged in successfully.'}, safe=True)
+            # Generate a nonce (random number) between 10000 and 109998
+            nonce = str(random.randint(10000, 109998))
 
+            user = User.objects.filter(solanaAddress=publicKey).first() or User.objects.filter(
+                ethereumAddress=publicKey).first()
+            if user is None:
+                registerFlag = True
+
+            if requestNonce:
+                if registerFlag:
+                    request.session[publicKey] = nonce
                 else:
-                    return JsonResponse({'message': 'Invalid password'}, safe=False)
+                    user.nonce = nonce
+                    user.save()
+
+            if registerFlag:
+                nonceToVerify = request.session.get(publicKey)
             else:
-                return JsonResponse({'message': 'Account is not existed'}, safe=False)
+                nonceToVerify = user.nonce
+
+            verified = verify_signature(
+                nonceToVerify, signature, publicKey, walletType)
+
+            if verified == False:
+                return JsonResponse({'message': 'Invalid signature, unable to login'}, safe=False, status=400)
+
+            if registerFlag:
+                user = User.objects.create(
+                    **{f'{walletType}Address': publicKey},
+                )
+            else:
+                user.nonce = nonce
+                user.save()
+
+            request.session['userId'] = user._id
+            request.session['logged'] = True
+
+            return JsonResponse({'message': 'Logged in successfully'}, safe=True, status=200)
 
         else:
-            return JsonResponse({'message': 'Invalid inputs', 'errors': form.errors}, safe=False)
+            return JsonResponse({'message': 'Invalid inputs', 'errors': form.errors}, safe=False, status=400)
+
+
+def logout(request):
+    if 'logged' in request.session:
+        del request.session['logged']
+        request.session.flush()  # Optional: Flush all of the session data
+        return JsonResponse({'message': 'You are logged out'}, safe=True, status=200)
+    else:
+        return JsonResponse({'message': 'You are already logged out'}, safe=False, status=400)
