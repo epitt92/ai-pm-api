@@ -19,7 +19,7 @@ from utils import is_valid_solana_address, verify_signature
 @method_decorator(csrf_exempt, name='dispatch')
 class SignupView(View):
     def post(self, request):
-
+        print('called')
         data = json.loads(request.body)
         form = UserRegisterationForm(data)
 
