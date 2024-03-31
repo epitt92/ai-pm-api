@@ -66,7 +66,6 @@ class SignupView(View):
 @method_decorator(csrf_exempt, name='dispatch')
 class SigninView(View):
     def post(self, request):
-
         data = json.loads(request.body)
         form = UserLoginForm(data)
 
@@ -75,8 +74,8 @@ class SigninView(View):
             requestNonce = data.get('requestNonce')
             signature = data.get('signature')
             walletType = data.get('walletType')
+            registerFlag = False
 
-            print(is_valid_solana_address(publicKey))
             if is_valid_solana_address(publicKey) == False:
                 return JsonResponse({'message': 'Invalid ${walletType} wallet address provided'}, safe=False, status=400)
 
@@ -94,6 +93,8 @@ class SigninView(View):
                 else:
                     user.nonce = nonce
                     user.save()
+
+                return JsonResponse({'nonce': nonce}, safe=True, status=200)
 
             if registerFlag:
                 nonceToVerify = request.session.get(publicKey)
@@ -114,7 +115,7 @@ class SigninView(View):
                 user.nonce = nonce
                 user.save()
 
-            request.session['userId'] = user._id
+            request.session['userId'] = str(user.id)
             request.session['logged'] = True
 
             return JsonResponse({'message': 'Logged in successfully'}, safe=True, status=200)
