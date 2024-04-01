@@ -65,6 +65,10 @@ CORS_ALLOW_CREDENTIALS = True
 #     "http://localhost:3000",
 #     "http://localhost:8000",]
 
+# SESSION_ENGINE Config
+SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_SAMESITE = 'None'
+
 ROOT_URLCONF = 'aisite.urls'
 
 TEMPLATES = [

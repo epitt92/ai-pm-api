@@ -14,9 +14,9 @@ class User(Document):
     biography = StringField(verbose_name='Biography')
     profile_picture = StringField(verbose_name='Profile Picture')
     solanaAddress = StringField(
-        max_length=100, unique=True, verbose_name='Address')
+        max_length=100, verbose_name='Address')
     ethereumAddress = StringField(
-        max_length=100, unique=True, verbose_name='Address')
+        max_length=100, verbose_name='Address')
     nonce = StringField(max_length=30, verbose_name='Nonce', required=False)
     role = StringField(max_length=20, verbose_name='Role')
     is_verified = BooleanField(default=False, verbose_name='Is Verified')

@@ -65,6 +65,12 @@ class SignupView(View):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class SigninView(View):
+    def get(self, request):
+        print(request.session.get('wallet'))
+        if (request.session.get('wallet') == None):
+            request.session['wallet'] = 'apple wallet'
+        return JsonResponse({'message': ''})
+
     def post(self, request):
         data = json.loads(request.body)
         form = UserLoginForm(data)
@@ -75,6 +81,7 @@ class SigninView(View):
             signature = data.get('signature')
             walletType = data.get('walletType')
             registerFlag = False
+            nonceToVerify = None
 
             if is_valid_solana_address(publicKey) == False:
                 return JsonResponse({'message': 'Invalid ${walletType} wallet address provided'}, safe=False, status=400)
