@@ -1,1 +1,1 @@
-from aisite.aisite.db import *
+from aisite.db import *
