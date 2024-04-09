@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-d6l4zmb8mmby8^@wp5f%ihh*gvqbo-c@&nffebc39r3zis*x8w'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -54,7 +54,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
     # custom middleare
-    # 'apps.user.middleware.AiSiteAuthenticateMiddleware',
+    'apps.user.middleware.AiSiteAuthenticateMiddleware',
 ]
 
 # CORS Config
@@ -64,10 +64,6 @@ CORS_ALLOW_CREDENTIALS = True
 # CORS_ALLOWED_ORIGINS = [
 #     "http://localhost:3000",
 #     "http://localhost:8000",]
-
-# SESSION_ENGINE Config
-SESSION_COOKIE_SECURE = True
-SESSION_COOKIE_SAMESITE = 'None'
 
 ROOT_URLCONF = 'aisite.urls'
 
@@ -141,5 +137,3 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-OPENAI_API_KEY = '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'  # Make sure to keep your API key secure
