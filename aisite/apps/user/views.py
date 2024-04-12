@@ -414,3 +414,37 @@ class UserExist(View):
             )
         else:
             return JsonResponse({"message": "Invalid Request", "errors": form.errors})
+
+@method_decorator(csrf_exempt, name="dispatch")
+class UserByPublicKey(View):
+    def get(self, request):
+        walletType = request.GET.get('walletType', None)
+        publicKey = request.GET.get('publicKey', None)
+
+        print(walletType, publicKey)
+
+
+        requester = Requester.objects(
+            **{f"{walletType}Address": publicKey},
+        ).first()
+        tasker = Tasker.objects(
+            **{f"{walletType}Address": publicKey},
+        ).first()
+
+        print(requester, tasker)
+
+        if requester is None and tasker is None:
+            return JsonResponse({"exist": False})
+
+        if requester:
+            return JsonResponse({
+                "exist": True,
+                "role": "requester",
+                "user": convertDBDataToJson(requester)
+            })
+        if tasker:
+            return JsonResponse({
+                "exist": True,
+                "role": "tasker",
+                "user": convertDBDataToJson(tasker)
+            })
