@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-d6l4zmb8mmby8^@wp5f%ihh*gvqbo-c@&nffebc39r3zis*x8w
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['https://ai-pm-fawn.vercel.app/']
 
 # Application definition
 
