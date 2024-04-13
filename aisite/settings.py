@@ -54,7 +54,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
     # custom middleare
-    'apps.user.middleware.AiSiteAuthenticateMiddleware',
+    # 'apps.user.middleware.AiSiteAuthenticateMiddleware',
 ]
 
 # CORS Config

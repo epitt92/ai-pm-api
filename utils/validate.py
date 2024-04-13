@@ -26,7 +26,6 @@ def is_valid_solana_address(address):
 
 
 def verify_signature(nonce, signature, public_key, wallet_type):
-    print(nonce, public_key)
     try:
         verified = False
         if wallet_type == "solana":
